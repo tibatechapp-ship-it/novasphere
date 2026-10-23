@@ -36,6 +36,11 @@ async def health() -> dict:
     }
 
 
+@app.get("/history")
+async def history() -> dict:
+    return {"count": len(manager.history), "messages": list(manager.history)}
+
+
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket) -> None:
     await manager.connect(websocket)
