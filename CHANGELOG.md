@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Message history (last 50) broadcast to new WebSocket clients, exposed via `/history`.
+
 ## [0.1.0] - 2026-10-23
 
 ### Added
