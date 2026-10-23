@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NovaSphere — Cyberpunk Real-Time</title>
+<style>
+  :root { --neon:#00f0ff; --pink:#ff00a8; --bg:#0a0a14; --panel:#12122a; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:'Courier New',monospace; background:var(--bg); color:var(--neon); min-height:100vh; overflow:hidden; }
+  .grid-bg { position:fixed; inset:0; background-image:linear-gradient(rgba(0,240,255,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(0,240,255,.08) 1px,transparent 1px); background-size:40px 40px; z-index:0; animation:scroll 8s linear infinite; }
+  @keyframes scroll { to { background-position:0 40px,40px 0; } }
+  .container { position:relative; z-index:1; max-width:1100px; margin:0 auto; padding:24px; }
+  header { display:flex; justify-content:space-between; align-items:center; padding:16px 0; border-bottom:1px solid var(--neon); text-shadow:0 0 8px var(--neon); }
+  h1 { margin:0; font-size:2rem; letter-spacing:4px; }
+  .status { font-size:.85rem; color:var(--pink); text-shadow:0 0 6px var(--pink); }
+  .panel { background:var(--panel); border:1px solid var(--neon); border-radius:8px; padding:16px; box-shadow:0 0 20px rgba(0,240,255,.2); }
+  #log { height:60vh; overflow-y:auto; padding:12px; font-size:.9rem; line-height:1.6; }
+  .line { border-bottom:1px dotted rgba(0,240,255,.2); padding:4px 0; }
+  .line.system { color:var(--pink); }
+  .input-row { display:flex; gap:8px; margin-top:12px; }
+  input { flex:1; background:#000; border:1px solid var(--neon); color:var(--neon); padding:10px; font-family:inherit; border-radius:4px; }
+  button { background:var(--neon); color:#000; border:none; padding:10px 20px; font-weight:bold; cursor:pointer; border-radius:4px; text-transform:uppercase; letter-spacing:2px; }
+  button:hover { background:var(--pink); color:#fff; }
+  .glitch { animation:glitch 2s infinite; }
+  @keyframes glitch { 0%,100%{transform:translate(0)} 20%{transform:translate(-2px,1px)} 40%{transform:translate(2px,-1px)} 60%{transform:translate(-1px,2px)} 80%{transform:translate(1px,-2px)} }
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="container">
+  <header>
+    <h1 class="glitch">NovaSphere</h1>
+    <div class="status" id="status">CONNECTING…</div>
+  </header>
+  <div class="panel" style="margin-top:24px;">
+    <div id="log"></div>
+    <div class="input-row">
+      <input id="msg" placeholder="broadcast a message…" autofocus />
+      <button onclick="send()">Transmit</button>
+    </div>
+  </div>
+</div>
+<script>
+  const log = document.getElementById('log');
+  const status = document.getElementById('status');
+  const ws = new WebSocket((location.protocol==='https:'?'wss':'ws')+'://'+location.host+'/ws');
+  ws.onopen = () => { status.textContent = 'ONLINE · ' + location.host; };
+  ws.onclose = () => { status.textContent = 'OFFLINE'; };
+  ws.onmessage = (e) => {
+    const div = document.createElement('div');
+    div.className = 'line' + (e.data.startsWith('[system]') ? ' system' : '');
+    div.textContent = e.data;
+    log.appendChild(div);
+    log.scrollTop = log.scrollHeight;
+  };
+  function send() {
+    const inp = document.getElementById('msg');
+    if (inp.value.trim()) { ws.send(inp.value.trim()); inp.value=''; }
+  }
+  document.getElementById('msg').addEventListener('keydown', (e)=>{ if(e.key==='Enter') send(); });
+</script>
+</body>
+</html>
